@@ -556,6 +556,7 @@ async function run() {
                     filesToRules[file].push({
                         min: rule.min,
                         requesting: rule.reviewers,
+                        mention_reviewers: rule.name === "authors",
                     });
                 } else {
                     core.setFailed("Rule annotation must contain a file");
