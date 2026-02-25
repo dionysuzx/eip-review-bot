@@ -105,4 +105,26 @@ describe("generateReviewerComment", () => {
         generateReviewerComment(filesToRules);
         expect(requesting).toEqual(["bob", "alice"]);
     });
+
+    it("collapses duplicate reviewer sets and prefers ping format", () => {
+        const filesToRules: { [key: string]: FileRuleCommentData[] } = {
+            "EIPS/eip-1.md": [
+                {
+                    min: 1,
+                    requesting: ["samwilsn"],
+                    mention_reviewers: false,
+                },
+                {
+                    min: 1,
+                    requesting: ["samwilsn"],
+                    mention_reviewers: true,
+                },
+            ],
+        };
+
+        const comment = generateReviewerComment(filesToRules);
+        expect(comment.match(/Requires/g)?.length).toBe(1);
+        expect(comment).toContain("Requires 1 more reviewers from @samwilsn");
+        expect(comment).not.toContain("`@samwilsn`");
+    });
 });

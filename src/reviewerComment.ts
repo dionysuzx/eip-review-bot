@@ -4,12 +4,8 @@ export type FileRuleCommentData = {
     mention_reviewers: boolean;
 };
 
-function buildRuleKey(
-    requesting: string[],
-    mention_reviewers: boolean,
-): string {
-    const mentionMode = mention_reviewers ? "mention" : "no-mention";
-    return `${mentionMode}:${requesting.join(",")}`;
+function buildRuleKey(requesting: string[]): string {
+    return requesting.join(",");
 }
 
 function formatReviewer(username: string, mention_reviewers: boolean): string {
@@ -22,8 +18,11 @@ function summarizeRules(
     const byRule = new Map<string, FileRuleCommentData>();
     for (const rule of fileRules) {
         const requesting = [...rule.requesting].sort();
-        const key = buildRuleKey(requesting, rule.mention_reviewers);
-        if (byRule.has(key)) {
+        const key = buildRuleKey(requesting);
+        const existing = byRule.get(key);
+        if (existing) {
+            existing.mention_reviewers =
+                existing.mention_reviewers || rule.mention_reviewers;
             continue;
         }
         byRule.set(key, {
