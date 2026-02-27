@@ -14,7 +14,7 @@ export default async function (
                 file.filename.startsWith("assets/eip-") &&
                 !files.some(
                     (f) =>
-                        f.filename == `EIPS/${file.filename.split("/")[2]}.md`,
+                        f.filename == `EIPS/${file.filename.split("/")[1]}.md`,
                 )
             ) {
                 filename = `EIPS/${file.filename.split("/")[1]}.md`;
@@ -22,7 +22,7 @@ export default async function (
                 file.filename.startsWith("assets/erc-") &&
                 !files.some(
                     (f) =>
-                        f.filename == `ERCS/${file.filename.split("/")[2]}.md`,
+                        f.filename == `ERCS/${file.filename.split("/")[1]}.md`,
                 )
             ) {
                 filename = `ERCS/${file.filename.split("/")[1]}.md`;

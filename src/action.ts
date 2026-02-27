@@ -372,6 +372,40 @@ async function run() {
         ).filter((file) => file != undefined) as File[];
         core.info(`Raw file object: ${JSON.stringify(files, null, 2)}`);
 
+        // Pre-populate markdown files for asset-only changes so rules
+        // can parse frontmatter and allow author auto-approval.
+        for (const file of [...files]) {
+            if (
+                !file.filename.startsWith("assets/eip-") &&
+                !file.filename.startsWith("assets/erc-")
+            )
+                continue;
+            const slug = file.filename.split("/")[1];
+            const mdFile = `${slug.startsWith("eip-") ? "EIPS" : "ERCS"}/${slug}.md`;
+            if (files.some((f) => f.filename === mdFile)) continue;
+            try {
+                let oid: string | undefined = mainBranchCommit.tree;
+                for (const part of mdFile.split("/")) {
+                    oid = (
+                        await git.readTree({ fs, dir: cloneDir, oid })
+                    ).tree.find((v) => v.path === part)?.oid;
+                    if (!oid) break;
+                }
+                if (!oid) continue;
+                const content = textDecoder.decode(
+                    (await git.readBlob({ fs, dir: cloneDir, oid })).blob,
+                );
+                files.push({
+                    filename: mdFile,
+                    status: "modified",
+                    contents: content,
+                    previous_contents: content,
+                });
+            } catch {
+                // Markdown file may not exist for this asset
+            }
+        }
+
         core.info("Processing files...");
         // Get rule results
         let result = (await processFiles(octokit, config, files)).map(
