@@ -4,4 +4,7 @@ export default {
     transform: {
         "^.+\\.(ts|tsx)$": "ts-jest",
     },
+    moduleNameMapper: {
+        "^(\\.{1,2}/.*)\\.js$": "$1",
+    },
 };
